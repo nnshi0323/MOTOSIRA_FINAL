@@ -1,0 +1,17 @@
+# per-machine / secrets
+.env
+venv/
+.venv/
+__pycache__/
+*.pyc
+# runtime data
+dashboard/motosira.db
+logs/*
+!logs/.gitkeep
+setup.log
+# audio (large) — keep recordings in Google Drive / the release zip
+*.wav
+*.WAV
+model/mock_data/*
+!model/mock_data/.gitkeep
+# trained models ARE committed (small) so the Pi gets the REAL model for EDGE mode via git pull

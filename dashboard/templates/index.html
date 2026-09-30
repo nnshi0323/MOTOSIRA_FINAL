@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MOTOSIRA Dashboard</title>
+<script src="/static/socket.io.min.js"></script>
+<style>
+:root{--bg:#14120F;--bg2:#0F0D0B;--card:#1F1B15;--card2:#26211A;--border:#332C1F;--line:#4A4030;
+--amber:#FFB020;--amberd:#8C6A20;--green:#4CE66B;--red:#FF3B30;--rust:#E8752C;--blue:#5AB0FF;
+--text:#F3EEE2;--muted:#8C8372;--muted2:#5A5346;
+--mono:Consolas,"Cascadia Mono","Courier New",monospace;--sans:"Segoe UI",Roboto,Arial,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh}
+button{font-family:inherit;cursor:pointer}
+.top{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:10px 18px;background:var(--bg2);border-bottom:2px solid var(--border)}
+.logo{font-size:24px;font-weight:800;letter-spacing:5px;color:var(--amber)}
+.logo small{display:block;font:10px var(--mono);letter-spacing:1px;color:var(--muted2);font-weight:400}
+.modesw{display:flex;border:1px solid var(--line);border-radius:3px;overflow:hidden;margin-left:auto}
+.modesw button{background:transparent;border:0;color:var(--muted);padding:8px 14px;font:700 12px var(--sans);letter-spacing:1px}
+.modesw button.on.real{background:#0D2410;color:var(--green)}
+.modesw button.on.mock{background:#2A1E05;color:var(--amber)}
+.pill{display:inline-flex;align-items:center;gap:6px;font:11px var(--mono);color:var(--muted);border:1px solid var(--line);border-radius:20px;padding:4px 10px;white-space:nowrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--muted2)}
+.dot.ok{background:var(--green);box-shadow:0 0 6px var(--green)} .dot.bad{background:var(--red)} .dot.warn{background:var(--rust)}
+.logout{font:11px var(--mono);color:var(--muted2);text-decoration:none} .logout:hover{color:var(--red)}
+.banner{display:none;padding:9px 18px;font-size:13px;border-bottom:1px solid var(--border)}
+.banner.mock{display:block;background:#2A1E05;color:var(--amber)}
+.banner.real{display:block;background:#0D2410;color:var(--green)}
+.banner.warn{display:block;background:#221207;color:var(--rust)}
+.shell{display:flex;min-height:calc(100vh - 90px)}
+.side{width:200px;flex-shrink:0;background:var(--bg2);border-right:2px solid var(--border);padding:14px 10px}
+.side .lbl{padding:0 8px 10px}
+.nav{display:block;width:100%;text-align:left;background:transparent;border:0;border-left:3px solid transparent;color:var(--muted);padding:11px 12px;margin-bottom:4px;font:600 13px var(--sans);letter-spacing:.5px;border-radius:2px}
+.nav:hover{background:var(--card);color:var(--text)} .nav.on{background:var(--card);color:var(--amber);border-left-color:var(--amber)}
+main{flex:1;min-width:0;padding:16px 18px}
+.view{display:none} .view.on{display:block}
+.grid{display:grid;gap:12px;margin-bottom:12px}
+.g2{grid-template-columns:3fr 2fr} .g3{grid-template-columns:repeat(3,1fr)} .g4{grid-template-columns:repeat(4,1fr)}
+@media(max-width:900px){.shell{flex-direction:column}.side{width:100%;display:flex;overflow-x:auto}.side .lbl{display:none}.nav{width:auto;white-space:nowrap}.g2,.g3,.g4{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--border);border-radius:3px;padding:14px}
+.lbl{font:10px var(--mono);letter-spacing:2px;color:var(--muted2);text-transform:uppercase;margin-bottom:8px}
+.row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--bg2);font-size:13px;gap:10px}
+.row:last-child{border-bottom:0} .row span:first-child{color:var(--muted)} .row b{font-family:var(--mono);font-weight:600}
+.stepper{display:flex;align-items:center;flex-wrap:wrap;gap:6px;background:var(--card);border:1px solid var(--border);border-radius:3px;padding:12px 16px;margin-bottom:12px}
+.step{display:flex;align-items:center;gap:8px;font:700 13px var(--sans);letter-spacing:1.5px;color:var(--muted2)}
+.step i{font-style:normal;width:24px;height:24px;border-radius:50%;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font:12px var(--mono)}
+.step.done{color:var(--green)} .step.done i{background:var(--green);color:#0a1a0a;border-color:var(--green)}
+.step.cur{color:var(--amber)} .step.cur i{background:var(--amber);color:#1a1200;border-color:var(--amber)}
+.arrow{color:var(--muted2);margin:0 6px}
+select{width:100%;background:var(--bg2);color:var(--text);border:1px solid var(--line);border-radius:2px;padding:9px;font:13px var(--sans)}
+.btn{background:var(--card2);border:1px solid var(--line);color:var(--text);padding:10px 16px;border-radius:2px;font:700 12px var(--sans);letter-spacing:1px;text-transform:uppercase}
+.btn:hover{border-color:var(--amberd)} .btn:disabled{opacity:.35;cursor:not-allowed}
+.btn.go{background:#2A1E05;border-color:var(--amber);color:var(--amber);font-size:15px;padding:14px 22px}
+.btn.ok{border-color:var(--green);color:var(--green);background:#0D1F10}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+.big{font:800 34px var(--sans);letter-spacing:2px;text-transform:uppercase;margin:6px 0}
+.mid{font:700 22px var(--mono)}
+.c-normal{color:var(--green)} .c-valve_ticking{color:var(--amber)} .c-misfire{color:var(--rust)} .c-knocking{color:var(--red)} .c-none{color:var(--muted)}
+.tag{display:inline-block;font:700 10px var(--mono);letter-spacing:1px;padding:2px 8px;border-radius:20px;border:1px solid var(--line);color:var(--muted);text-transform:uppercase}
+.tag.good{border-color:var(--green);color:var(--green)} .tag.bad{border-color:var(--rust);color:var(--rust)}
+.tag.mock{border-color:var(--amber);color:var(--amber)} .tag.real{border-color:var(--green);color:var(--green)}
+.gauge{position:relative;height:14px;background:var(--bg2);border:1px solid var(--border);border-radius:2px;overflow:hidden;margin-top:8px}
+.gauge .fill{height:100%;width:0;transition:width .5s}
+.gauge .red{position:absolute;right:0;top:0;bottom:0;width:25%;border-left:1px dashed var(--red);background:repeating-linear-gradient(135deg,rgba(255,59,48,.12) 0 4px,transparent 4px 8px)}
+.wave{display:flex;align-items:flex-end;gap:2px;height:60px;margin-top:6px}
+.wave div{flex:1;background:var(--amber);opacity:.7;min-height:2px;border-radius:1px}
+.warnbox{margin-top:8px;font-size:12px;color:var(--rust)}
+.probs .pr{display:flex;align-items:center;gap:8px;font:12px var(--mono);margin:3px 0}
+.probs .pr span{width:110px;color:var(--muted)} .probs .bar{flex:1;height:8px;background:var(--bg2);border-radius:2px;overflow:hidden}
+.probs .bar div{height:100%;background:var(--amberd)}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{text-align:left;font:10px var(--mono);letter-spacing:1px;color:var(--muted2);text-transform:uppercase;padding:7px 8px;border-bottom:1px solid var(--border)}
+td{padding:8px;border-bottom:1px solid var(--bg2);font-family:var(--mono)}
+tr.click{cursor:pointer} tr.click:hover{background:var(--card2)}
+.muted{color:var(--muted)} .small{font-size:12px}
+.toast{position:fixed;right:16px;top:16px;z-index:9;padding:12px 16px;border-radius:3px;font:600 13px var(--sans);display:none;max-width:420px;border:1px solid}
+.toast.ok{display:block;background:#0D1F10;border-color:var(--green);color:var(--green)}
+.toast.bad{display:block;background:#220806;border-color:var(--red);color:var(--red)}
+img.cm{max-width:100%;border:1px solid var(--border);background:#fff}
+.help h3{color:var(--amber);font-size:14px;margin:14px 0 4px} .help p,.help li{font-size:13px;color:#C9C2B3;line-height:1.6} .help ul{padding-left:18px}
+</style>
+</head>
+<body>
+<div id="toast" class="toast"></div>
+<div class="top">
+  <div class="logo">MOTOSIRA<small>Motorcycle Sound-based Identification &amp; Reporting Assistant</small></div>
+  <div class="modesw" title="REAL = Raspberry Pi + INMP441 + model trained on real recordings. DEMO = simulated device + simulated dataset.">
+    <button id="m-real" class="real" onclick="setMode('real')">REAL</button>
+    <button id="m-mock" class="mock" onclick="setMode('mock')">DEMO</button>
+  </div>
+  <span class="pill"><span id="d-broker" class="dot"></span><span id="t-broker">Broker</span></span>
+  <span class="pill"><span id="d-dev" class="dot"></span><span id="t-dev">Device</span></span>
+  <span class="pill" id="clock">--:--:--</span>
+  <a class="logout" href="/logout">LOGOUT</a>
+</div>
+<div id="banner" class="banner"></div>
+
+<div class="shell">
+<nav class="side">
+  <div class="lbl">Navigation</div>
+  <button class="nav on" data-v="v-dash">Dashboard</button>
+  <button class="nav" data-v="v-diag">New Diagnosis</button>
+  <button class="nav" data-v="v-report">Diagnosis Report</button>
+  <button class="nav" data-v="v-hist">History</button>
+  <button class="nav" data-v="v-model">Model &amp; Dataset</button>
+  <button class="nav" data-v="v-help">Help</button>
+</nav>
+<main>
+
+<!-- ═════════ DASHBOARD ═════════ -->
+<section id="v-dash" class="view on">
+  <div class="grid g3">
+    <div class="card"><div class="lbl">Last result</div>
+      <div id="dl-cond" class="big c-none">—</div><div id="dl-meta" class="muted small">No diagnosis yet</div></div>
+    <div class="card"><div class="lbl">Confidence</div><div id="dl-conf" class="mid">—</div>
+      <div class="lbl" style="margin-top:12px">Severity</div><div id="dl-sev" class="mid">— / 3</div>
+      <div class="gauge"><div id="dl-gauge" class="fill"></div><div class="red"></div></div></div>
+    <div class="card"><div class="lbl">Latency (end-to-end)</div><div id="dl-lat" class="mid">—</div>
+      <div class="muted small" id="dl-latm">Target ≤ 3.00 s per diagnostic cycle</div></div>
+  </div>
+  <div class="grid g2">
+    <div class="card"><div class="lbl">Session stats — <span id="st-mode">mode</span></div>
+      <div class="grid g4" style="margin:0" id="st-grid"></div>
+      <div class="muted small" id="st-lat" style="margin-top:6px"></div></div>
+    <div class="card"><div class="lbl">System</div>
+      <div class="row"><span>Mode</span><b id="sy-mode">—</b></div>
+      <div class="row"><span>Model</span><b id="sy-model">—</b></div>
+      <div class="row"><span>Device</span><b id="sy-dev">—</b></div>
+      <div class="row"><span>Broker</span><b id="sy-broker">—</b></div></div>
+  </div>
+  <div class="btns"><button class="btn go" onclick="go('v-diag')">▶ New Diagnosis</button>
+    <button class="btn" onclick="exportCSV()">Export CSV</button><button class="btn" onclick="go('v-hist')">History</button></div>
+</section>
+
+<!-- ═════════ NEW DIAGNOSIS (V3 UCID) ═════════ -->
+<section id="v-diag" class="view">
+  <div class="stepper">
+    <div class="step cur" data-s="1"><i>1</i>CAPTURE</div><span class="arrow">→</span>
+    <div class="step" data-s="2"><i>2</i>ANALYZE</div><span class="arrow">→</span>
+    <div class="step" data-s="3"><i>3</i>RESULT</div><span class="arrow">→</span>
+    <div class="step" data-s="4"><i>4</i>REPORT</div>
+  </div>
+  <div class="grid g2">
+    <div class="card"><div class="lbl">Audio capture</div>
+      <div class="grid g2" style="margin-bottom:10px">
+        <div><div class="muted small">Motorcycle model</div><select id="bike" onchange="setBike(this.value)"></select></div>
+        <div id="simwrap"><div class="muted small">Simulate condition (DEMO only)</div>
+          <select id="sim"><option value="random">Random</option></select></div>
+      </div>
+      <div class="row"><span>Status</span><b id="cap-status">READY</b></div>
+      <div class="row"><span>Input quality</span><span id="cap-q" class="tag">—</span></div>
+      <div class="row"><span>Placement</span><span class="muted small">INMP441 ~30 cm from engine block, engine at target RPM</span></div>
+      <div class="btns" style="margin-top:10px"><button id="startBtn" class="btn go" onclick="startCapture()">▶ START DIAGNOSIS</button>
+        <button class="btn" onclick="newScan()">↻ New scan</button></div>
+    </div>
+    <div class="card"><div class="lbl">Live engine data</div>
+      <div class="row"><span>RPM</span><b id="le-rpm">—</b></div>
+      <div class="row"><span>Signal quality</span><b id="le-sig">—</b></div>
+      <div class="row"><span>Analysis status</span><b id="le-an">Idle</b></div>
+      <div class="row"><span>Latency (device / PC / end-to-end)</span><b id="le-lat">—</b></div>
+      <div class="lbl" style="margin-top:8px">Waveform (captured audio envelope)</div><div class="wave" id="wave"></div>
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:12px"><div class="lbl">Diagnosis result — read this first</div>
+    <div class="grid g2" style="margin:0">
+      <div><div id="r-cond" class="big c-none">—</div>
+        <div class="small">Confidence <b id="r-conf" class="mid" style="font-size:16px">—</b> &nbsp; Severity <b id="r-sev" class="mid" style="font-size:16px">—</b></div>
+        <div id="r-sevt" class="muted small"></div><div id="r-warn" class="warnbox"></div></div>
+      <div><div class="lbl">Class probabilities</div><div id="r-probs" class="probs muted small">—</div></div>
+    </div>
+  </div>
+  <div class="btns" style="margin-bottom:12px"><button class="btn" id="viewRep" onclick="go('v-report')" disabled>View diagnosis report</button>
+    <button class="btn ok" id="savePdf" onclick="downloadPDF()" disabled>Save PDF</button></div>
+  <div class="card"><div class="lbl">Diagnosis report preview</div><div id="preview" class="small muted">—</div></div>
+</section>
+
+<!-- ═════════ REPORT ═════════ -->
+<section id="v-report" class="view">
+  <div class="card" style="max-width:640px"><div class="lbl">Diagnosis report</div><div id="rep">Run or select a diagnosis first.</div>
+    <div class="btns" style="margin-top:12px"><button class="btn ok" onclick="downloadPDF()">Download PDF</button>
+      <button class="btn" onclick="exportCSV()">Export CSV (all sessions)</button></div></div>
+</section>
+
+<!-- ═════════ HISTORY ═════════ -->
+<section id="v-hist" class="view">
+  <div class="card"><div class="lbl">Session log — <span id="h-mode"></span> (click a row to open its report)</div>
+    <div style="overflow-x:auto"><table><thead><tr><th>#</th><th>Time</th><th>Motorcycle</th><th>Result</th><th>Conf.</th><th>Sev.</th><th>Signal</th><th>Latency</th><th>Source</th><th>PDF</th></tr></thead>
+    <tbody id="h-body"><tr><td colspan="10" class="muted">No sessions yet</td></tr></tbody></table></div></div>
+  <div class="btns" style="margin-top:12px"><button class="btn" onclick="exportCSV()">Export CSV</button></div>
+</section>
+
+<!-- ═════════ MODEL & DATASET ═════════ -->
+<section id="v-model" class="view">
+  <div class="grid g2"><div class="card"><div class="lbl">Model — <span id="mo-mode"></span></div><div id="mo-info"></div>
+      <div class="lbl" style="margin-top:12px">Per motorcycle model (held-out test)</div><div id="mo-bikes" class="small muted">—</div></div>
+    <div class="card"><div class="lbl">Confusion matrix (held-out test set)</div><div id="mo-cm" class="muted small">—</div></div></div>
+</section>
+
+<!-- ═════════ HELP ═════════ -->
+<section id="v-help" class="view"><div class="card help" style="max-width:760px">
+  <h3>REAL vs DEMO mode</h3><p><b>REAL</b>: the Raspberry Pi records with the INMP441; results come from the model trained on your real, mechanic-verified recordings. <b>DEMO</b>: a simulated device on this PC produces synthetic engine sounds and a model trained on a simulated dataset classifies them. DEMO shows the complete pipeline working; it is never a real diagnosis. Real microphone audio is only ever judged by the REAL model.</p>
+  <h3>Running a diagnosis</h3><ul><li>Select the motorcycle model (Honda TMX 125 Alpha is the primary platform).</li>
+  <li>Place the INMP441 about 30 cm from the engine block; start the engine and hold the target RPM.</li>
+  <li>Press START here or on the Pi's touchscreen. The device records 3 seconds, filters the sound, extracts MFCC features and the Random Forest classifies them.</li>
+  <li>Read the result first: condition, confidence and severity. "CHECK NOISE" or "low confidence" means re-record.</li></ul>
+  <h3>Conditions</h3><p>Normal · Valve ticking (severity 1) · Misfire (severity 2) · Knocking (severity 3). MOTOSIRA identifies conditions from sound only and does not connect to the motorcycle's electrical system.</p>
+  <h3>Reports</h3><p>Every session is saved automatically (and on the Pi's microSD). Open any row in History for its report; "Save PDF" downloads it; "Export CSV" downloads all sessions.</p>
+</div></section>
+</main></div>
+
+<script>
+const $ = id => document.getElementById(id);
+const socket = io();
+let S = null, last = null, capTimer = null, hist = [];
+const CLS = {normal:'NORMAL',knocking:'KNOCKING',misfire:'MISFIRE',valve_ticking:'VALVE TICKING'};
+const SEVC = {0:'var(--green)',1:'var(--amber)',2:'var(--rust)',3:'var(--red)'};
+
+function toast(msg, ok=true){ const t=$('toast'); t.textContent=msg; t.className='toast '+(ok?'ok':'bad'); clearTimeout(t._h); t._h=setTimeout(()=>t.className='toast',4000); }
+function esc(s){ return String(s ?? '').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function go(v){ document.querySelectorAll('.view').forEach(x=>x.classList.toggle('on',x.id===v)); document.querySelectorAll('.nav').forEach(b=>b.classList.toggle('on',b.dataset.v===v)); if(v==='v-model') loadModel(); if(v==='v-hist') loadHistory(); }
+document.querySelectorAll('.nav').forEach(b=>b.onclick=()=>go(b.dataset.v));
+setInterval(()=>$('clock').textContent=new Date().toTimeString().slice(0,8),1000);
+async function api(url, body){ const r = await fetch(url, body===undefined?{}:{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}); if(r.status===401){location.href='/login';throw new Error('login');} return r.json().then(j=>({ok:r.ok,...j})); }
+function fmtMs(ms){ return ms==null ? '—' : (ms/1000).toFixed(2)+' s'; }
+
+function setStep(n){ document.querySelectorAll('.step').forEach(s=>{const k=+s.dataset.s; s.className='step'+(k<n?' done':k===n?' cur':'');}); }
+
+function modeDevice(){ const want = S.mode==='real'?'inmp441':'mock'; return (S.devices||[]).find(d=>d.source===want); }
+function render(){
+  if(!S) return;
+  const m=S.mode, info=S.models[m];
+  $('m-real').classList.toggle('on',m==='real'); $('m-mock').classList.toggle('on',m==='mock');
+  const b=$('banner');
+  if(m==='mock'){ b.className='banner mock'; b.textContent='DEMO MODE — simulated device and simulated training data. Demonstrates the pipeline; not a real diagnosis.'; }
+  else if(!info.trained){ b.className='banner warn'; b.textContent='REAL MODE — no model trained on real recordings yet. Captures are analysed (signal quality, MFCC, latency) but not classified. Train with: python model/train.py --mode real'; }
+  else { b.className='banner real'; b.textContent=`REAL MODE — Raspberry Pi + INMP441; model trained ${info.trained_at} on ${info.samples} real clips (${info.classes.map(c=>CLS[c]).join(', ')}).`; }
+  $('simwrap').style.visibility = m==='mock' ? 'visible':'hidden';
+  $('d-broker').className='dot '+(S.broker.connected?'ok':'bad'); $('t-broker').textContent='Broker '+(S.broker.connected?'OK':'DOWN');
+  const d=modeDevice(); const devOk=d&&d.online&&d.mic==='ok';
+  $('d-dev').className='dot '+(devOk?'ok':(d&&d.online?'warn':'bad'));
+  $('t-dev').textContent = m==='real' ? (d&&d.online ? (d.mic==='ok'?'Pi + INMP441 OK':'Pi online — MIC ERROR') : 'Pi offline') : (d&&d.online?'Simulated device OK':'Simulated device offline');
+  $('sy-mode').textContent=S.modes[m]; $('sy-model').textContent=info.trained?`trained ${info.trained_at}`:'NOT TRAINED';
+  $('sy-dev').textContent=d? `${d.device} ${d.online?'online':'offline'}${d.mic&&d.mic!=='ok'?' — '+d.mic:''}`:'none seen';
+  $('sy-broker').textContent=`${S.broker.host}:${S.broker.port} ${S.broker.connected?'connected':'DISCONNECTED'}`;
+  $('st-mode').textContent=S.modes[m]; $('h-mode').textContent=S.modes[m]; $('mo-mode').textContent=S.modes[m];
+  const bs=$('bike'); if(!bs.options.length){ S.bikes.forEach(x=>bs.add(new Option(x+(x===S.bikes[0]?' (primary)':''),x))); const sim=$('sim'); Object.keys(CLS).forEach(c=>sim.add(new Option(CLS[c],c))); }
+  bs.value=S.bike;
+}
+async function refresh(){ S = await api('/api/state'); render(); loadStats(); loadHistory(); }
+async function setMode(m){ S = await api('/api/mode',{mode:m}); render(); newScan(); loadStats(); loadHistory(); toast('Mode: '+S.modes[m]); }
+async function setBike(b){ await api('/api/bike',{bike:b}); }
+
+async function startCapture(){
+  const r = await api('/api/capture',{simulate:$('sim').value});
+  if(!r.ok){ toast(r.error||'Could not start',false); return; }
+  $('startBtn').disabled=true; setStep(1); clearResult();
+  let n=S.duration_s; $('cap-status').textContent=`RECORDING (${n})`; $('le-an').textContent='Capturing on '+r.device;
+  clearInterval(capTimer); capTimer=setInterval(()=>{ n--; if(n>0){$('cap-status').textContent=`RECORDING (${n})`;} else { clearInterval(capTimer); setStep(2); $('cap-status').textContent='COMPLETE'; $('le-an').textContent='Analyzing: filter → MFCC → Random Forest'; } },1000);
+  setTimeout(()=>{ if($('startBtn').disabled){ $('startBtn').disabled=false; $('le-an').textContent='No result — check device'; } }, (S.duration_s+10)*1000);
+}
+function clearResult(){ ['r-conf','r-sev','le-rpm','le-sig','le-lat'].forEach(i=>$(i).textContent='—'); $('r-cond').textContent='—'; $('r-cond').className='big c-none'; $('r-sevt').textContent=''; $('r-warn').textContent=''; $('r-probs').textContent='—'; $('cap-q').textContent='—'; $('cap-q').className='tag'; $('wave').innerHTML=''; }
+function newScan(){ clearInterval(capTimer); setStep(1); clearResult(); $('cap-status').textContent='READY'; $('le-an').textContent='Idle'; $('startBtn').disabled=false; }
+
+function showResult(r){
+  last=r; clearInterval(capTimer); $('startBtn').disabled=false; setStep(4);
+  $('cap-status').textContent='COMPLETE'; $('le-an').textContent='Done';
+  const good=r.signal_quality==='GOOD'; const q=$('cap-q'); q.textContent=good?'GOOD':'CHECK NOISE'; q.className='tag '+(good?'good':'bad');
+  $('le-sig').textContent=`${r.signal_quality} (SNR ${r.snr_db} dB, peak ${r.peak_dbfs} dBFS)`;
+  $('le-rpm').textContent=r.rpm? r.rpm+' RPM':'N/A (sensor not connected)';
+  showLatency(r);
+  const w=$('wave'); w.innerHTML=''; (r.envelope||[]).forEach(v=>{const d=document.createElement('div'); d.style.height=Math.max(3,v*100)+'%'; w.appendChild(d);});
+  const lab=r.classification; const warn=[];
+  if(lab){ $('r-cond').textContent=CLS[lab]; $('r-cond').className='big c-'+lab; $('r-conf').textContent=(r.confidence*100).toFixed(0)+'%'; $('r-sev').textContent=r.severity+' / 3'; $('r-sev').style.color=SEVC[r.severity]; $('r-sevt').textContent=S.severity[lab].text;
+    if(r.confidence < S.confidence_warn) warn.push('Low confidence — re-record before relying on this result.');
+    const pr=Object.entries(r.probabilities||{}).sort((a,b)=>b[1]-a[1]); $('r-probs').innerHTML=pr.map(([c,p])=>`<div class="pr"><span>${CLS[c]}</span><div class="bar"><div style="width:${p*100}%"></div></div>${(p*100).toFixed(0)}%</div>`).join('');
+  } else { $('r-cond').textContent='NOT CLASSIFIED'; $('r-cond').className='big c-none'; warn.push(`${S.modes[r.mode]} model not trained yet — see Model & Dataset.`); }
+  if(!good) warn.push('Check noise: '+(r.quality_reason||'signal quality low')+' — re-record recommended.');
+  if(r.mode==='mock' && r.simulated_condition) warn.push(`Simulated condition sent by the demo device: ${CLS[r.simulated_condition]}.`);
+  $('r-warn').innerHTML=warn.map(esc).join('<br>');
+  $('viewRep').disabled=false; $('savePdf').disabled=false;
+  $('preview').innerHTML=`ID <b>#${r.id}</b> · ${esc(r.time)} · ${esc(r.bike)} · Condition <b>${lab?CLS[lab]:'NOT CLASSIFIED'}</b>${lab?` · Confidence ${(r.confidence*100).toFixed(0)}% · Severity ${r.severity}/3`:''} · ${S.modes[r.mode]}`;
+  renderReport(r); renderDash(r);
+}
+function showLatency(r){ $('le-lat').textContent=`${r.feature_ms??'—'} ms / ${r.pc_ms??'—'} ms / ${fmtMs(r.e2e_ms)}`; }
+function renderDash(r){
+  const lab=r.classification; $('dl-cond').textContent=lab?CLS[lab]:'NOT CLASSIFIED'; $('dl-cond').className='big c-'+(lab||'none');
+  $('dl-meta').textContent=`#${r.id} · ${r.time} · ${r.bike}`; $('dl-conf').textContent=lab?(r.confidence*100).toFixed(0)+'%':'—';
+  $('dl-sev').textContent=lab?r.severity+' / 3':'— / 3'; $('dl-gauge').style.width=lab?[6,33,66,100][r.severity]+'%':'0'; $('dl-gauge').style.background=lab?SEVC[r.severity]:'';
+  $('dl-lat').textContent=fmtMs(r.e2e_ms); $('dl-lat').style.color=r.e2e_ms==null?'':(r.e2e_ms<=S.latency_target_ms?'var(--green)':'var(--rust)');
+}
+function renderReport(r){
+  const lab=r.classification;
+  const rows=[['Report ID','#'+r.id],['Date / time',r.time],['Motorcycle',r.bike],['Mode',S.modes[r.mode]],['Source',r.source==='inmp441'?'INMP441 (Raspberry Pi 4)':'Simulated device'],
+    ['Detected condition',lab?CLS[lab]:'NOT CLASSIFIED'],['Confidence',lab?(r.confidence*100).toFixed(1)+' %':'—'],['Severity',lab?`${r.severity} / 3 — ${S.severity[lab].text}`:'—'],
+    ['Signal quality',`${r.signal_quality} (SNR ${r.snr_db} dB)`],['RPM',r.rpm||'N/A'],['Latency end-to-end',fmtMs(r.e2e_ms)]];
+  $('rep').innerHTML=(r.mode==='mock'?'<div class="warnbox" style="margin:0 0 8px">DEMO — simulated data, not a real diagnosis.</div>':'')+rows.map(([k,v])=>`<div class="row"><span>${k}</span><b>${esc(v)}</b></div>`).join('');
+}
+function downloadPDF(){ if(!last){toast('No diagnosis selected',false);return;} location.href=`/api/report/${last.id}.pdf`; }
+function exportCSV(){ location.href='/api/export.csv?mode='+S.mode; }
+
+async function loadStats(){
+  const st=(await api('/api/stats'))[S.mode]; const g=$('st-grid');
+  g.innerHTML=[['Total',st.total,''],['Normal',st.by_class.normal||0,'c-normal'],['Valve tick',st.by_class.valve_ticking||0,'c-valve_ticking'],['Misfire',st.by_class.misfire||0,'c-misfire'],['Knocking',st.by_class.knocking||0,'c-knocking'],['Unclassified',st.by_class.unclassified||0,'c-none']]
+    .map(([k,v,c])=>`<div><div class="mid ${c}">${v}</div><div class="muted small">${k}</div></div>`).join('');
+  $('st-lat').textContent = st.latency.n ? `Mean end-to-end latency ${fmtMs(st.latency.mean_ms)} over ${st.latency.n} sessions (min ${fmtMs(st.latency.min_ms)}, max ${fmtMs(st.latency.max_ms)})` : '';
+}
+async function loadHistory(){
+  hist = await api('/api/history?limit=100&mode='+S.mode); if(!Array.isArray(hist)) hist=[];
+  const tb=$('h-body');
+  if(!hist.length){ tb.innerHTML='<tr><td colspan="10" class="muted">No sessions yet</td></tr>'; return; }
+  tb.innerHTML=hist.map((r,i)=>`<tr class="click" data-i="${i}"><td>#${r.id}</td><td>${esc(r.time.slice(5))}</td><td>${esc(r.bike)}</td>
+    <td class="c-${r.classification||'none'}">${r.classification?CLS[r.classification]:'—'}</td><td>${r.confidence!=null?(r.confidence*100).toFixed(0)+'%':'—'}</td>
+    <td>${r.severity??'—'}</td><td><span class="tag ${r.signal_quality==='GOOD'?'good':'bad'}">${esc(r.signal_quality)}</span></td><td>${fmtMs(r.e2e_ms)}</td>
+    <td><span class="tag ${r.mode}">${r.source==='inmp441'?'INMP441':'SIM'}</span></td><td><a href="/api/report/${r.id}.pdf" onclick="event.stopPropagation()" style="color:var(--amber)">PDF</a></td></tr>`).join('');
+  tb.querySelectorAll('tr.click').forEach(tr=>tr.onclick=()=>{ const r=hist[+tr.dataset.i]; last=r; renderReport(r); go('v-report'); });
+  if(!last && hist[0]) { renderDash(hist[0]); }
+}
+async function loadModel(){
+  const i=S.models[S.mode];
+  if(!i.trained){ $('mo-info').innerHTML=`<div class="warnbox" style="margin:0">Not trained. Run: <b>python model/train.py --mode ${S.mode}</b></div>`; $('mo-cm').textContent='—'; $('mo-bikes').textContent='—'; return; }
+  $('mo-info').innerHTML=[['Trained',i.trained_at],['Training clips',i.samples],['Source recordings',i.recordings],['Classes',i.classes.map(c=>CLS[c]).join(', ')],
+    ['Held-out test accuracy',(i.test_accuracy*100).toFixed(1)+' %'],['CV macro-F1 (tuning)',(i.cv_accuracy*100).toFixed(1)+' %'],['Train/test split',i.split],['Data',i.synthetic?'SIMULATED (demo only)':'REAL recordings']]
+    .map(([k,v])=>`<div class="row"><span>${k}</span><b>${esc(v)}</b></div>`).join('');
+  $('mo-cm').innerHTML=`<img class="cm" src="/api/model/${S.mode}/confusion.png?t=${Date.now()}" alt="confusion matrix">`;
+  const m=await api(`/api/model/${S.mode}/metrics`);
+  $('mo-bikes').innerHTML=Object.entries(m.per_motorcycle||{}).map(([k,v])=>`<div class="row"><span>${esc(k)}</span><b>${(v.accuracy*100).toFixed(1)}% on ${v.test_clips} clips</b></div>`).join('')||'—';
+}
+
+socket.on('connect',()=>refresh());
+socket.on('state',s=>{ S=s; render(); });
+socket.on('devices',d=>{ if(S){ S.devices=d; render(); } });
+socket.on('broker',b=>{ if(S){ S.broker.connected=b.connected; render(); } });
+socket.on('result',r=>{ if(!S) return; if(r.mode===S.mode){ showResult(r); toast((r.classification?CLS[r.classification]:'Not classified')+' — '+r.bike, true); } loadStats(); loadHistory(); });
+socket.on('ack',a=>{ if(last&&last.id===a.id){ last.e2e_ms=a.e2e_ms; showLatency(last); renderDash(last); renderReport(last); } loadStats(); });
+</script>
+</body>
+</html>

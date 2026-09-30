@@ -1,0 +1,14 @@
+# Shell/Python/config stay LF so they run on the Pi even when committed from Windows
+*.sh    text eol=lf
+*.py    text eol=lf
+*.conf  text eol=lf
+*.md    text eol=lf
+*.txt   text eol=lf
+*.html  text eol=lf
+# Windows batch files need CRLF
+*.bat   text eol=crlf
+# binary
+*.wav   binary
+*.WAV   binary
+*.png   binary
+*.joblib binary

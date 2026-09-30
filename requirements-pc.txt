@@ -1,0 +1,20 @@
+# MOTOSIRA — Dashboard PC (Windows, Python 3.12 or 3.13). All have prebuilt win_amd64 wheels (verified).
+# Core audio/ML versions are IDENTICAL to the Pi so features and models match exactly.
+numpy==2.2.6
+scipy==1.18.1
+librosa==1.0.0
+numba==0.67.0
+llvmlite==0.49.0
+soundfile==0.14.0
+soxr==1.1.0
+scikit-learn==1.9.1
+joblib==1.6.0
+paho-mqtt==2.1.0
+python-dotenv==1.2.3
+# dashboard, reports, charts
+flask==3.1.2
+flask-socketio==5.5.1
+simple-websocket==1.1.0
+reportlab==4.4.4
+matplotlib==3.10.7
+requests==2.34.2

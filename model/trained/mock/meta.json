@@ -1,0 +1,49 @@
+{
+  "mode": "mock",
+  "synthetic": true,
+  "trained_at": "2026-09-30 12:57:15",
+  "classes": [
+    "knocking",
+    "misfire",
+    "normal",
+    "valve_ticking"
+  ],
+  "n_samples": 360,
+  "n_recordings": 360,
+  "n_features": 80,
+  "test_accuracy": 1.0,
+  "cv_accuracy": 0.9966,
+  "cv_metric": "macro F1",
+  "split_method": "grouped",
+  "best_params": {
+    "rf__max_depth": null,
+    "rf__min_samples_leaf": 1,
+    "rf__n_estimators": 150
+  },
+  "feature_config": {
+    "sample_rate": 22050,
+    "duration_s": 3,
+    "n_mfcc": 40,
+    "stats": "mean+std",
+    "lowpass_hz": 8000
+  },
+  "versions": {
+    "scikit-learn": "1.9.1",
+    "librosa": "1.0.0",
+    "numpy": "2.2.6"
+  },
+  "counts": {
+    "normal|Honda TMX 125 Alpha": 30,
+    "normal|Rusi Macho 125": 30,
+    "normal|Suzuki Smash Carb": 30,
+    "knocking|Honda TMX 125 Alpha": 30,
+    "knocking|Rusi Macho 125": 30,
+    "knocking|Suzuki Smash Carb": 30,
+    "misfire|Honda TMX 125 Alpha": 30,
+    "misfire|Rusi Macho 125": 30,
+    "misfire|Suzuki Smash Carb": 30,
+    "valve_ticking|Honda TMX 125 Alpha": 30,
+    "valve_ticking|Rusi Macho 125": 30,
+    "valve_ticking|Suzuki Smash Carb": 30
+  }
+}

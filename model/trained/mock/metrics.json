@@ -1,0 +1,162 @@
+{
+  "test_accuracy": 1.0,
+  "report": {
+    "NORMAL": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 18.0
+    },
+    "KNOCKING": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 18.0
+    },
+    "MISFIRE": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 18.0
+    },
+    "VALVE TICKING": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 18.0
+    },
+    "accuracy": 1.0,
+    "macro avg": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 72.0
+    },
+    "weighted avg": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 72.0
+    }
+  },
+  "confusion_matrix": [
+    [
+      18,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      18,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      18,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      18
+    ]
+  ],
+  "labels": [
+    "normal",
+    "knocking",
+    "misfire",
+    "valve_ticking"
+  ],
+  "per_motorcycle": {
+    "Honda TMX 125 Alpha": {
+      "test_clips": 17,
+      "accuracy": 1.0
+    },
+    "Rusi Macho 125": {
+      "test_clips": 35,
+      "accuracy": 1.0
+    },
+    "Suzuki Smash Carb": {
+      "test_clips": 20,
+      "accuracy": 1.0
+    }
+  },
+  "test_files": [
+    "model/mock_data/normal/honda_tmx_125_alpha/mock_s01007_000.wav",
+    "model/mock_data/normal/honda_tmx_125_alpha/mock_s01015_000.wav",
+    "model/mock_data/normal/rusi_macho_125/mock_s01034_000.wav",
+    "model/mock_data/normal/rusi_macho_125/mock_s01037_000.wav",
+    "model/mock_data/normal/rusi_macho_125/mock_s01041_000.wav",
+    "model/mock_data/normal/rusi_macho_125/mock_s01043_000.wav",
+    "model/mock_data/normal/rusi_macho_125/mock_s01044_000.wav",
+    "model/mock_data/normal/rusi_macho_125/mock_s01045_000.wav",
+    "model/mock_data/normal/rusi_macho_125/mock_s01046_000.wav",
+    "model/mock_data/normal/rusi_macho_125/mock_s01047_000.wav",
+    "model/mock_data/normal/rusi_macho_125/mock_s01048_000.wav",
+    "model/mock_data/normal/rusi_macho_125/mock_s01051_000.wav",
+    "model/mock_data/normal/rusi_macho_125/mock_s01055_000.wav",
+    "model/mock_data/normal/rusi_macho_125/mock_s01059_000.wav",
+    "model/mock_data/normal/suzuki_smash_carb/mock_s01062_000.wav",
+    "model/mock_data/normal/suzuki_smash_carb/mock_s01068_000.wav",
+    "model/mock_data/normal/suzuki_smash_carb/mock_s01074_000.wav",
+    "model/mock_data/normal/suzuki_smash_carb/mock_s01076_000.wav",
+    "model/mock_data/knocking/honda_tmx_125_alpha/mock_s01095_000.wav",
+    "model/mock_data/knocking/honda_tmx_125_alpha/mock_s01096_000.wav",
+    "model/mock_data/knocking/honda_tmx_125_alpha/mock_s01111_000.wav",
+    "model/mock_data/knocking/rusi_macho_125/mock_s01128_000.wav",
+    "model/mock_data/knocking/rusi_macho_125/mock_s01131_000.wav",
+    "model/mock_data/knocking/rusi_macho_125/mock_s01132_000.wav",
+    "model/mock_data/knocking/rusi_macho_125/mock_s01134_000.wav",
+    "model/mock_data/knocking/rusi_macho_125/mock_s01136_000.wav",
+    "model/mock_data/knocking/rusi_macho_125/mock_s01144_000.wav",
+    "model/mock_data/knocking/rusi_macho_125/mock_s01146_000.wav",
+    "model/mock_data/knocking/rusi_macho_125/mock_s01150_000.wav",
+    "model/mock_data/knocking/suzuki_smash_carb/mock_s01153_000.wav",
+    "model/mock_data/knocking/suzuki_smash_carb/mock_s01156_000.wav",
+    "model/mock_data/knocking/suzuki_smash_carb/mock_s01158_000.wav",
+    "model/mock_data/knocking/suzuki_smash_carb/mock_s01167_000.wav",
+    "model/mock_data/knocking/suzuki_smash_carb/mock_s01168_000.wav",
+    "model/mock_data/knocking/suzuki_smash_carb/mock_s01173_000.wav",
+    "model/mock_data/knocking/suzuki_smash_carb/mock_s01180_000.wav",
+    "model/mock_data/misfire/honda_tmx_125_alpha/mock_s01181_000.wav",
+    "model/mock_data/misfire/honda_tmx_125_alpha/mock_s01184_000.wav",
+    "model/mock_data/misfire/honda_tmx_125_alpha/mock_s01190_000.wav",
+    "model/mock_data/misfire/honda_tmx_125_alpha/mock_s01203_000.wav",
+    "model/mock_data/misfire/honda_tmx_125_alpha/mock_s01206_000.wav",
+    "model/mock_data/misfire/honda_tmx_125_alpha/mock_s01207_000.wav",
+    "model/mock_data/misfire/rusi_macho_125/mock_s01211_000.wav",
+    "model/mock_data/misfire/rusi_macho_125/mock_s01218_000.wav",
+    "model/mock_data/misfire/rusi_macho_125/mock_s01221_000.wav",
+    "model/mock_data/misfire/rusi_macho_125/mock_s01222_000.wav",
+    "model/mock_data/misfire/rusi_macho_125/mock_s01229_000.wav",
+    "model/mock_data/misfire/rusi_macho_125/mock_s01231_000.wav",
+    "model/mock_data/misfire/suzuki_smash_carb/mock_s01248_000.wav",
+    "model/mock_data/misfire/suzuki_smash_carb/mock_s01250_000.wav",
+    "model/mock_data/misfire/suzuki_smash_carb/mock_s01251_000.wav",
+    "model/mock_data/misfire/suzuki_smash_carb/mock_s01253_000.wav",
+    "model/mock_data/misfire/suzuki_smash_carb/mock_s01259_000.wav",
+    "model/mock_data/misfire/suzuki_smash_carb/mock_s01269_000.wav",
+    "model/mock_data/valve_ticking/honda_tmx_125_alpha/mock_s01272_000.wav",
+    "model/mock_data/valve_ticking/honda_tmx_125_alpha/mock_s01278_000.wav",
+    "model/mock_data/valve_ticking/honda_tmx_125_alpha/mock_s01279_000.wav",
+    "model/mock_data/valve_ticking/honda_tmx_125_alpha/mock_s01287_000.wav",
+    "model/mock_data/valve_ticking/honda_tmx_125_alpha/mock_s01296_000.wav",
+    "model/mock_data/valve_ticking/honda_tmx_125_alpha/mock_s01297_000.wav",
+    "model/mock_data/valve_ticking/rusi_macho_125/mock_s01311_000.wav",
+    "model/mock_data/valve_ticking/rusi_macho_125/mock_s01314_000.wav",
+    "model/mock_data/valve_ticking/rusi_macho_125/mock_s01315_000.wav",
+    "model/mock_data/valve_ticking/rusi_macho_125/mock_s01316_000.wav",
+    "model/mock_data/valve_ticking/rusi_macho_125/mock_s01319_000.wav",
+    "model/mock_data/valve_ticking/rusi_macho_125/mock_s01320_000.wav",
+    "model/mock_data/valve_ticking/rusi_macho_125/mock_s01321_000.wav",
+    "model/mock_data/valve_ticking/rusi_macho_125/mock_s01329_000.wav",
+    "model/mock_data/valve_ticking/rusi_macho_125/mock_s01330_000.wav",
+    "model/mock_data/valve_ticking/suzuki_smash_carb/mock_s01331_000.wav",
+    "model/mock_data/valve_ticking/suzuki_smash_carb/mock_s01352_000.wav",
+    "model/mock_data/valve_ticking/suzuki_smash_carb/mock_s01359_000.wav"
+  ]
+}
